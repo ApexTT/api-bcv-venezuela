@@ -1,104 +1,78 @@
 import requests
-import json
 from fastapi import FastAPI
 from datetime import datetime
 
-# 1. Creamos nuestro servidor API
-app = FastAPI(title="API BCV Inteligente")
+app = FastAPI(title="API BCV Premium (USD/EUR)")
 
-# --- MOTORES DE EXTRACCIÓN ---
+# --- MOTORES ACTUALIZADOS ---
 
 def motor_dolar_al_dia():
     try:
         url = 'https://api.dolaraldiavzla.com/api/v1/dollar?page=bcv'
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        # timeout=5 significa que si la página tarda más de 5 segundos, abortamos y seguimos
-        res = requests.get(url, headers=headers, timeout=5) 
-        datos = res.json()
+        res = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5).json()
+        monitor = res['monitors']
         
-        precio = datos['monitors']['usd']['price']
-        # La fecha viene así: '20/03/2026, 12:00 AM'
-        fecha_str = datos['monitors']['usd']['last_update']
-        fecha_obj = datetime.strptime(fecha_str, "%d/%m/%Y, %I:%M %p")
-        
-        return {"fuente": "Dolar Al Día", "precio": precio, "fecha": fecha_obj}
-    except Exception as e:
-        print(f"Fallo Dolar Al Día: {e}")
-        return None
+        return {
+            "fuente": "Dolar Al Día",
+            "usd": monitor['usd']['price'],
+            "eur": monitor['eur']['price'],
+            "fecha": datetime.strptime(monitor['usd']['last_update'], "%d/%m/%Y, %I:%M %p")
+        }
+    except: return None
 
 def motor_al_cambio():
     try:
         url = 'https://api.alcambio.app/graphql'
-        headers = {'User-Agent': 'Mozilla/5.0', 'Content-Type': 'application/json'}
-        query = """query getCountryConversions($countryCode: String!) { getCountryConversions(payload: {countryCode: $countryCode}) { conversionRates { type baseValue } dateBcv } }"""
+        query = """query { getCountryConversions(payload: {countryCode: "VE"}) { 
+            conversionRates { type baseValue rateCurrency { code } } 
+            dateBcv } }"""
+        res = requests.post(url, json={"query": query}, timeout=5).json()['data']['getCountryConversions']
         
-        res = requests.post(url, json={"query": query, "variables": {"countryCode": "VE"}}, headers=headers, timeout=5)
-        datos = res.json()['data']['getCountryConversions']
-        
-        # Buscamos el SECONDARY
-        precio = 0
-        for tasa in datos['conversionRates']:
-            if tasa['type'] == 'SECONDARY':
-                precio = round(tasa['baseValue'], 2)
-                break
-                
-        fecha_obj = datetime.fromtimestamp(datos['dateBcv'] / 1000.0)
-        
-        return {"fuente": "Al Cambio", "precio": precio, "fecha": fecha_obj}
-    except Exception as e:
-        print(f"Fallo Al Cambio: {e}")
-        return None
+        precios = {t['rateCurrency']['code']: round(t['baseValue'], 2) for t in res['conversionRates']}
+        return {
+            "fuente": "Al Cambio",
+            "usd": precios.get('USD'),
+            "eur": precios.get('EUR'),
+            "fecha": datetime.fromtimestamp(res['dateBcv'] / 1000.0)
+        }
+    except: return None
 
 def motor_criptodolar():
     try:
         url = 'https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd'
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        res = requests.get(url, headers=headers, timeout=5)
-        datos = res.json()[0]
+        res = requests.get(url, timeout=5).json()
         
-        precio = datos['price']
-        # La fecha viene así: '2026-03-19T00:13:30.183Z' (Cortamos los primeros 19 caracteres)
-        fecha_obj = datetime.strptime(datos['updatedAt'][:19], "%Y-%m-%dT%H:%M:%S")
+        # Buscamos en la lista por el "slug"
+        usd = next(item for item in res if item['slug'] == 'dolar-bcv')
+        eur = next(item for item in res if item['slug'] == 'euro-bcv')
         
-        return {"fuente": "CriptoDolar", "precio": precio, "fecha": fecha_obj}
-    except Exception as e:
-        print(f"Fallo CriptoDolar: {e}")
-        return None
+        return {
+            "fuente": "CriptoDolar",
+            "usd": usd['price'],
+            "eur": eur['price'],
+            "fecha": datetime.strptime(usd['updatedAt'][:19], "%Y-%m-%dT%H:%M:%S")
+        }
+    except: return None
 
-# --- EL CEREBRO DE LA API ---
+# --- EL CEREBRO ---
 
-@app.get("/api/v1/bcv")
-def obtener_tasa_inteligente():
-    resultados = []
+@app.get("/api/v1/tasas")
+def obtener_tasas():
+    fuentes = [f for f in [motor_dolar_al_dia(), motor_al_cambio(), motor_criptodolar()] if f]
     
-    # Encendemos los 3 motores
-    dato1 = motor_dolar_al_dia()
-    if dato1 is not None: resultados.append(dato1)
-        
-    dato2 = motor_al_cambio()
-    if dato2 is not None: resultados.append(dato2)
-        
-    dato3 = motor_criptodolar()
-    if dato3 is not None: resultados.append(dato3)
+    if not fuentes:
+        return {"error": "Servidores de origen no disponibles"}
+
+    # Ganador por fecha más reciente
+    ganador = max(fuentes, key=lambda x: x['fecha'])
     
-    # Verificamos si todos fallaron (casi imposible, pero hay que preverlo)
-    if len(resultados) == 0:
-        return {"error": "Todos los servidores de origen están caídos."}
-        
-    # La magia: Comparamos las fechas para elegir al ganador
-    tasa_ganadora = resultados[0] # Asumimos temporalmente que el primero ganó
-    
-    for dato in resultados:
-        # Si la fecha de este dato es mayor (más reciente) que la del ganador actual, lo reemplazamos
-        if dato["fecha"] > tasa_ganadora["fecha"]:
-            tasa_ganadora = dato
-            
-    # Entregamos el paquete final limpio y formateado a tu aplicación
     return {
-        "moneda": "USD_BCV",
-        "precio": tasa_ganadora["precio"],
-        "fuente_ganadora": tasa_ganadora["fuente"],
-        # Convertimos la fecha ganadora a texto normal para enviarla por internet
-        "fecha_actualizacion": tasa_ganadora["fecha"].strftime("%Y-%m-%d %I:%M %p"),
-        "motores_activos": len(resultados)
+        "status": "success",
+        "fecha_actualizacion": ganador['fecha'].strftime("%d/%m/%Y %I:%M %p"),
+        "fuente_oficial": ganador['fuente'],
+        "tasas": {
+            "USD": ganador['usd'],
+            "EUR": ganador['eur']
+        },
+        "motores_online": len(fuentes)
     }

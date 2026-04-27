@@ -22,9 +22,11 @@ app.add_middleware(
 )
 
 # --- 1. CONFIGURACIÓN DE SEGURIDAD Y MEMORIA ---
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://tu-proyecto.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "tu-anon-key-aqui")
-# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://czibntnkaskqhkxqpasy.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6aWJudG5rYXNrcWhreHFwYXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzI0NjksImV4cCI6MjA5MTcwODQ2OX0.glaR9JC2i49W_G_DlFqxl-tC5il6nUYj-Kj0-J8o0rg")
+
+# Inicializamos el cliente Supabase de forma activa
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 API_KEY_NAME = "X-Admin-Token"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
@@ -96,21 +98,32 @@ async def motor_criptodolar(client: httpx.AsyncClient):
         return None
 
 async def motor_tasas_alternativas(client: httpx.AsyncClient):
+    mercado = {}
+    
+    # Intento 1: Menú completo de vCoud
     try:
-        url = 'https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd'
-        res = await client.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
-        data = res.json()
-        mercado = {}
-        for item in data:
-            slug = item.get('slug', '')
-            precio = item.get('price', 0)
-            if slug == 'enparalelovzla': mercado["enparalelovzla"] = precio
-            elif slug == 'binance' or slug == 'binance-p2p': mercado["binance"] = precio
-            elif slug == 'dolartoday': mercado["dolartoday"] = precio
-        return {"mercado": mercado}
+        url_vcoud = 'https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd'
+        res = await client.get(url_vcoud, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
+        if res.status_code == 200:
+            for item in res.json():
+                slug = item.get('slug', '')
+                if slug == 'enparalelovzla': mercado["enparalelovzla"] = item.get('price', 0)
+                elif slug in ['binance', 'binance-p2p']: mercado["binance"] = item.get('price', 0)
+                elif slug == 'dolartoday': mercado["dolartoday"] = item.get('price', 0)
     except Exception as e:
-        print(f"Fallo extracción alternativas: {e}")
-        return {"mercado": {}}
+        print(f"Fallo CriptoDolar alternativas: {e}")
+
+    # Intento 2 (Respaldo Vital): Si el paralelo está vacío, lo forzamos desde Dolar Al Día
+    if "enparalelovzla" not in mercado or mercado["enparalelovzla"] == 0:
+        try:
+            url_dad = 'https://api.dolaraldiavzla.com/api/v1/dollar?page=enparalelovzla'
+            res_dad = await client.get(url_dad, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
+            if res_dad.status_code == 200:
+                mercado["enparalelovzla"] = res_dad.json()['monitors']['usd']['price']
+        except Exception as e:
+            print(f"Fallo respaldo Dolar Al Día Paralelo: {e}")
+
+    return {"mercado": mercado}
 
 # --- 3. EL CEREBRO CENTRALIZADO ---
 
@@ -181,12 +194,24 @@ async def obtener_tasas_v2():
 @app.post("/api/inventario/blindar-precios")
 def actualizar_precios_masivo(payload: TasasManuales, api_key: str = Depends(verificar_token_admin)):
     try:
+        # Extraemos la tasa paralela del diccionario que envía el panel
+        tasa_paralelo_extraida = payload.tasas_alternativas.get("enparalelovzla", payload.tasa_bcv)
+        
+        # DISPARAMOS LA FUNCIÓN SQL EN LA BASE DE DATOS
+        respuesta = supabase.rpc(
+            "ejecutar_blindaje_financiero", 
+            {
+                "nueva_tasa_bcv": payload.tasa_bcv, 
+                "nueva_tasa_paralelo": tasa_paralelo_extraida
+            }
+        ).execute()
+        
         return {
             "status": "success",
-            "mensaje": "Tasas manuales recibidas. El recálculo masivo se ha disparado.",
-            "datos_enviados": {
-                "bcv": payload.tasa_bcv,
-                "alternativas": payload.tasas_alternativas
+            "mensaje": "Recálculo masivo ejecutado en Supabase.",
+            "datos_procesados": {
+                "bcv_aplicado": payload.tasa_bcv,
+                "paralelo_aplicado": tasa_paralelo_extraida
             }
         }
     except Exception as e:

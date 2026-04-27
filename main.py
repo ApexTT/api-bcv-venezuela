@@ -113,18 +113,23 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
     except Exception as e:
         print(f"Fallo CriptoDolar alternativas: {e}")
 
-    # Intento 2 (Respaldo Vital): Si el paralelo está vacío, lo forzamos desde Dolar Al Día
+    # Intento 2 (Respaldo Indestructible): Usamos la API raíz oficial
     if "enparalelovzla" not in mercado or mercado["enparalelovzla"] == 0:
         try:
-            url_dad = 'https://api.dolaraldiavzla.com/api/v1/dollar?page=enparalelovzla'
-            res_dad = await client.get(url_dad, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
-            if res_dad.status_code == 200:
-                mercado["enparalelovzla"] = res_dad.json()['monitors']['usd']['price']
+            url_pydolar = 'https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=enparalelovzla'
+            res_pydolar = await client.get(url_pydolar, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
+            if res_pydolar.status_code == 200:
+                monitores = res_pydolar.json().get('monitors', {})
+                
+                # Extraemos el precio buscando la llave correcta
+                if 'enparalelovzla' in monitores:
+                    mercado["enparalelovzla"] = monitores['enparalelovzla']['price']
+                elif 'usd' in monitores:
+                    mercado["enparalelovzla"] = monitores['usd']['price']
         except Exception as e:
-            print(f"Fallo respaldo Dolar Al Día Paralelo: {e}")
+            print(f"Fallo respaldo PyDolar Paralelo: {e}")
 
     return {"mercado": mercado}
-
 # --- 3. EL CEREBRO CENTRALIZADO ---
 
 async def obtener_datos_consolidados():

@@ -1,8 +1,7 @@
 fastapi
 uvicorn
-requests
-slowapi
-pydantic
-supabase
 httpx
 cachetools
+pydantic
+supabase
+beautifulsoup4

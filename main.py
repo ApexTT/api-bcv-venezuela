@@ -14,12 +14,22 @@ from bs4 import BeautifulSoup
 
 app = FastAPI(title="API BCV Premium (Redundancia Total + Euro + Respaldos)")
 
-# --- 0. CONFIGURACIÓN CORS ---
+# --- 0. CONFIGURACIÓN CORS (BLINDADA MULTI-SITIO) ---
+
+# Lista de dominios autorizados para consumir la API
+ORIGINES_PERMITIDOS = [
+    "https://monitor-tasas.alblizfranco92.workers.dev",  # Monitor principal
+    "https://repuestos-mga.vercel.app",                 # Catálogo de repuestos
+    "https://aq-abrahanburguer.netlify.app",            # Página de Abrahan
+    "http://localhost:5500",                            # Entorno de desarrollo local
+    "http://127.0.0.1:5500"                             # Variante local
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=ORIGINES_PERMITIDOS, 
     allow_credentials=True,
-    allow_methods=["*"], 
+    allow_methods=["GET", "POST"], 
     allow_headers=["*"], 
 )
 
@@ -47,7 +57,7 @@ class TasasManuales(BaseModel):
     tasas_alternativas: dict
 
 # ==========================================
-# FASE 1: MOTORES DE REDUNDANCIA BCV (Ahora con EURO)
+# FASE 1: MOTORES DE REDUNDANCIA BCV (Con EURO)
 # ==========================================
 
 async def motor_dolar_al_dia(client: httpx.AsyncClient):
@@ -101,7 +111,6 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
     mercado = {"binance": None, "enparalelovzla": None}
     
     # --- 1. BLOQUE BINANCE ---
-    # Intento A: Web Scraping API P2P Directo (Puede bloquear Render)
     try:
         url_bin = "https://p2p.binance.com/bapi/c2c/v2/public/c2c/adv/search"
         payload = {"asset": "USDT", "fiat": "VES", "tradeType": "BUY", "publisherType": "merchant", "rows": 5, "page": 1}
@@ -111,7 +120,6 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
             if precios: mercado["binance"] = round(sum(precios) / len(precios), 2)
     except: pass
 
-    # Intento B: Respaldo vCoud (Súper estable en Render, nunca falla)
     if not mercado.get("binance"):
         try:
             res_vc_bin = await client.get('https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
@@ -120,7 +128,6 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
                 if binance_data: mercado["binance"] = binance_data.get('price')
         except: pass
 
-    # Intento C: Respaldo Dolar Al Día (El mismo que saca el BCV perfecto)
     if not mercado.get("binance"):
         try:
             res_dad_bin = await client.get('https://api.dolaraldiavzla.com/api/v1/dollar?page=binance', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
@@ -133,19 +140,17 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
         except: pass
 
     # --- 2. BLOQUE PARALELO ---
-    # Intento A: Scraping Exchange Monitor (Ya funcionó, no se toca)
     try:
         url_ex = 'https://exchangemonitor.net/calculadora/venezuela/dolar-enparalelovzla'
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'}
         res_ex = await client.get(url_ex, headers=headers, timeout=5.0)
         if res_ex.status_code == 200:
-            soup = BeautifulSoup(res.text, 'html.parser')
+            soup = BeautifulSoup(res_ex.text, 'html.parser')
             precio_tag = soup.find("h2", string=re.compile(r'\d+,\d+')) or soup.find(class_=re.compile("precio"))
             if precio_tag:
                 mercado["enparalelovzla"] = float(re.search(r'(\d+,\d+)', precio_tag.get_text()).group(1).replace(',', '.'))
     except: pass
     
-    # Intento B: Respaldo Paralelo vía DolarAPI
     if not mercado.get("enparalelovzla"):
         try:
             res_da = await client.get('https://ve.dolarapi.com/v1/dolares/paralelo', timeout=5.0)
@@ -153,7 +158,6 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
                 mercado["enparalelovzla"] = res_da.json().get('promedio', None)
         except: pass
 
-    # Intento C: Respaldo Paralelo vía PyDolarVenezuela
     if not mercado.get("enparalelovzla"):
         try:
             res_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=enparalelovzla', timeout=5.0)
@@ -182,7 +186,6 @@ async def obtener_datos_consolidados():
     bcv1, bcv2, bcv3, alt = resultados
     fuentes_bcv = [f for f in [bcv1, bcv2, bcv3] if f]
 
-    # Prevención total de nulls
     mercado_final = alt["mercado"] if alt else {}
     if not mercado_final.get("binance"):
         mercado_final["binance"] = fuentes_bcv[0]['usd'] if fuentes_bcv else 0

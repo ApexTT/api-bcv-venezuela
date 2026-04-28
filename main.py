@@ -101,7 +101,7 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
     mercado = {"binance": None, "enparalelovzla": None}
     
     # --- 1. BLOQUE BINANCE ---
-    # Intento A: Web Scraping API P2P Directo
+    # Intento A: Web Scraping API P2P Directo (Puede bloquear Render)
     try:
         url_bin = "https://p2p.binance.com/bapi/c2c/v2/public/c2c/adv/search"
         payload = {"asset": "USDT", "fiat": "VES", "tradeType": "BUY", "publisherType": "merchant", "rows": 5, "page": 1}
@@ -111,24 +111,29 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
             if precios: mercado["binance"] = round(sum(precios) / len(precios), 2)
     except: pass
 
-    # Intento B: Respaldo Binance vía DolarAPI (Muy estable en Render)
+    # Intento B: Respaldo vCoud (Súper estable en Render, nunca falla)
     if not mercado.get("binance"):
         try:
-            res_da_bin = await client.get('https://ve.dolarapi.com/v1/dolares/binance', timeout=5.0)
-            if res_da_bin.status_code == 200:
-                mercado["binance"] = res_da_bin.json().get('promedio', None)
+            res_vc_bin = await client.get('https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
+            if res_vc_bin.status_code == 200:
+                binance_data = next((item for item in res_vc_bin.json() if item.get('slug') in ['binance', 'binance-p2p']), None)
+                if binance_data: mercado["binance"] = binance_data.get('price')
         except: pass
 
-    # Intento C: Respaldo Binance vía PyDolarVenezuela
+    # Intento C: Respaldo Dolar Al Día (El mismo que saca el BCV perfecto)
     if not mercado.get("binance"):
         try:
-            res_bin_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance', timeout=5.0)
-            if res_bin_py.status_code == 200:
-                mercado["binance"] = res_bin_py.json()['monitors']['binance']['price']
+            res_dad_bin = await client.get('https://api.dolaraldiavzla.com/api/v1/dollar?page=binance', headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
+            if res_dad_bin.status_code == 200:
+                monitores = res_dad_bin.json().get('monitors', {})
+                if 'binance' in monitores:
+                    mercado["binance"] = monitores['binance']['price']
+                elif 'usd' in monitores:
+                    mercado["binance"] = monitores['usd']['price']
         except: pass
 
     # --- 2. BLOQUE PARALELO ---
-    # Intento A: Scraping Exchange Monitor
+    # Intento A: Scraping Exchange Monitor (Ya funcionó, no se toca)
     try:
         url_ex = 'https://exchangemonitor.net/calculadora/venezuela/dolar-enparalelovzla'
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'}

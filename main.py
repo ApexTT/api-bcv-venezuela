@@ -18,7 +18,7 @@ app = FastAPI(title="API BCV Premium (Redundancia Total + Euro + Respaldos)")
 
 # Lista de dominios autorizados para consumir la API
 ORIGINES_PERMITIDOS = [
-    "https://monitor-tasas.alblizfranco92.workers.dev",  # Monitor principal
+    "https://monitor-tasas.vnzla.workers.dev",  # Monitor principal
     "https://repuestos-mga.vercel.app",                 # Catálogo de repuestos
     "https://aq-abrahanburguer.netlify.app",            # Página de Abrahan
     "http://localhost:5500",                            # Entorno de desarrollo local

@@ -12,7 +12,7 @@ from cachetools import TTLCache
 from supabase import create_client, Client
 from bs4 import BeautifulSoup
 
-app = FastAPI(title="API BCV Premium (Redundancia Total + Binance P2P)")
+app = FastAPI(title="API BCV Premium (Redundancia Total + Euro + Respaldos)")
 
 # --- 0. CONFIGURACIÓN CORS ---
 app.add_middleware(
@@ -47,7 +47,7 @@ class TasasManuales(BaseModel):
     tasas_alternativas: dict
 
 # ==========================================
-# FASE 1: MOTORES DE REDUNDANCIA BCV (Los 3 originales)
+# FASE 1: MOTORES DE REDUNDANCIA BCV (Ahora con EURO)
 # ==========================================
 
 async def motor_dolar_al_dia(client: httpx.AsyncClient):
@@ -58,6 +58,7 @@ async def motor_dolar_al_dia(client: httpx.AsyncClient):
         return {
             "fuente": "Dolar Al Día",
             "usd": monitor['usd']['price'],
+            "eur": monitor['eur']['price'],
             "fecha": datetime.strptime(monitor['usd']['last_update'], "%d/%m/%Y, %I:%M %p")
         }
     except: return None
@@ -72,6 +73,7 @@ async def motor_al_cambio_bcv(client: httpx.AsyncClient):
         return {
             "fuente": "Al Cambio",
             "usd": precios.get('USD'),
+            "eur": precios.get('EUR'),
             "fecha": datetime.fromtimestamp(data['dateBcv'] / 1000.0)
         }
     except: return None
@@ -80,63 +82,75 @@ async def motor_criptodolar_bcv(client: httpx.AsyncClient):
     try:
         url = 'https://exchange.vcoud.com/coins/latest?type=bolivar&base=usd'
         res = await client.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=5.0)
-        usd = next(item for item in res.json() if item['slug'] == 'dolar-bcv')
+        datos = res.json()
+        usd = next(item for item in datos if item['slug'] == 'dolar-bcv')
+        eur = next(item for item in datos if item['slug'] == 'euro-bcv')
         return {
             "fuente": "CriptoDolar",
             "usd": usd['price'],
+            "eur": eur['price'],
             "fecha": datetime.strptime(usd['updatedAt'][:19], "%Y-%m-%dT%H:%M:%S")
         }
     except: return None
 
 # ==========================================
-# FASE 2: MOTORES DE MERCADO ALTERNATIVO (Binance + Scraping)
+# FASE 2: MOTORES DE MERCADO ALTERNATIVO (Triple Respaldo)
 # ==========================================
 
-async def motor_binance_p2p(client: httpx.AsyncClient):
+async def motor_tasas_alternativas(client: httpx.AsyncClient):
+    mercado = {"binance": None, "enparalelovzla": None}
+    
+    # --- 1. BLOQUE BINANCE ---
+    # Intento A: Web Scraping API P2P Directo
     try:
-        url = "https://p2p.binance.com/bapi/c2c/v2/public/c2c/adv/search"
-        payload = {
-            "asset": "USDT", "fiat": "VES", "tradeType": "BUY",
-            "publisherType": "merchant", "rows": 5, "page": 1
-        }
-        res = await client.post(url, json=payload, timeout=5.0)
-        if res.status_code == 200:
-            precios = [float(adv['adv']['price']) for adv in res.json().get('data', [])]
-            if precios: return round(sum(precios) / len(precios), 2)
-    except: return None
+        url_bin = "https://p2p.binance.com/bapi/c2c/v2/public/c2c/adv/search"
+        payload = {"asset": "USDT", "fiat": "VES", "tradeType": "BUY", "publisherType": "merchant", "rows": 5, "page": 1}
+        res_bin = await client.post(url_bin, json=payload, timeout=5.0)
+        if res_bin.status_code == 200:
+            precios = [float(adv['adv']['price']) for adv in res_bin.json().get('data', [])]
+            if precios: mercado["binance"] = round(sum(precios) / len(precios), 2)
+    except: pass
 
-async def motor_exchange_monitor(client: httpx.AsyncClient):
+    # Intento B: Respaldo Binance vía PyDolarVenezuela
+    if not mercado["binance"]:
+        try:
+            res_bin_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance', timeout=5.0)
+            if res_bin_py.status_code == 200:
+                mercado["binance"] = res_bin_py.json()['monitors']['binance']['price']
+        except: pass
+
+    # --- 2. BLOQUE PARALELO ---
+    # Intento A: Scraping Exchange Monitor
     try:
-        url = 'https://exchangemonitor.net/calculadora/venezuela/dolar-enparalelovzla'
+        url_ex = 'https://exchangemonitor.net/calculadora/venezuela/dolar-enparalelovzla'
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'}
-        res = await client.get(url, headers=headers, timeout=5.0)
-        if res.status_code == 200:
+        res_ex = await client.get(url_ex, headers=headers, timeout=5.0)
+        if res_ex.status_code == 200:
             soup = BeautifulSoup(res.text, 'html.parser')
             precio_tag = soup.find("h2", string=re.compile(r'\d+,\d+')) or soup.find(class_=re.compile("precio"))
             if precio_tag:
-                return float(re.search(r'(\d+,\d+)', precio_tag.get_text()).group(1).replace(',', '.'))
-    except: return None
-
-async def motor_tasas_alternativas(client: httpx.AsyncClient):
-    mercado = {}
+                mercado["enparalelovzla"] = float(re.search(r'(\d+,\d+)', precio_tag.get_text()).group(1).replace(',', '.'))
+    except: pass
     
-    # 1. Binance P2P Directo
-    mercado["binance"] = await motor_binance_p2p(client)
-
-    # 2. Paralelo vía Scraping
-    paralelo = await motor_exchange_monitor(client)
-    
-    # 3. Respaldo Paralelo si falla el Scraping
-    if not paralelo:
+    # Intento B: Respaldo Paralelo vía DolarAPI
+    if not mercado["enparalelovzla"]:
         try:
-            url_al = 'https://api.alcambio.app/graphql'
-            query = """query { getCountryConversions(payload: {countryCode: "VE"}) { conversionRates { type baseValue rateCurrency { code } } } }"""
-            res_al = await client.post(url_al, json={"query": query}, timeout=5.0)
-            tasas = res_al.json()['data']['getCountryConversions']['conversionRates']
-            paralelo = next((t['baseValue'] for t in tasas if t['type'] == 'PARALLEL'), None)
+            res_da = await client.get('https://ve.dolarapi.com/v1/dolares/paralelo', timeout=5.0)
+            if res_da.status_code == 200:
+                mercado["enparalelovzla"] = res_da.json().get('promedio', None)
         except: pass
 
-    mercado["enparalelovzla"] = paralelo
+    # Intento C: Respaldo Paralelo vía PyDolarVenezuela
+    if not mercado["enparalelovzla"]:
+        try:
+            res_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=enparalelovzla', timeout=5.0)
+            if res_py.status_code == 200:
+                mercado["enparalelovzla"] = res_py.json()['monitors']['enparalelovzla']['price']
+        except: pass
+
+    # Salvavidas final: Si todo falla, al menos copiamos el BCV para que no haya nulls fatales
+    # (Esto se resuelve más abajo en la consolidación si es necesario, pero garantizamos que el JSON se arme)
+    
     return {"mercado": mercado}
 
 # ==========================================
@@ -158,15 +172,42 @@ async def obtener_datos_consolidados():
     bcv1, bcv2, bcv3, alt = resultados
     fuentes_bcv = [f for f in [bcv1, bcv2, bcv3] if f]
 
+    # Prevención total de nulls
+    mercado_final = alt["mercado"] if alt else {}
+    if not mercado_final.get("binance"):
+        mercado_final["binance"] = fuentes_bcv[0]['usd'] if fuentes_bcv else 0
+    if not mercado_final.get("enparalelovzla"):
+        mercado_final["enparalelovzla"] = fuentes_bcv[0]['usd'] if fuentes_bcv else 0
+
     datos = {
         "fuentes_bcv": fuentes_bcv,
-        "alternativas": alt["mercado"] if alt else {}
+        "alternativas": mercado_final
     }
 
     if fuentes_bcv:
         cache_tasas["datos_completos"] = datos
 
     return datos
+
+@app.get("/api/v1/tasas")
+async def obtener_tasas():
+    datos = await obtener_datos_consolidados()
+    fuentes = datos["fuentes_bcv"]
+    
+    if not fuentes:
+        return {"error": "Servidores de origen no disponibles"}
+
+    ganador = max(fuentes, key=lambda x: x['fecha'])
+    return {
+        "status": "success",
+        "fecha_actualizacion": ganador['fecha'].strftime("%d/%m/%Y %I:%M %p"),
+        "fuente_oficial": ganador['fuente'],
+        "tasas": {
+            "USD": ganador['usd'],
+            "EUR": ganador['eur']
+        },
+        "motores_online": len(fuentes)
+    }
 
 @app.get("/api/v2/tasas")
 async def obtener_tasas_v2():
@@ -179,6 +220,7 @@ async def obtener_tasas_v2():
     ganador_bcv = max(fuentes_bcv, key=lambda x: x['fecha'])
     return {
         "bcv": ganador_bcv['usd'],
+        "eur": ganador_bcv['eur'], # ¡El Euro ahora está activo aquí!
         "alternativas": datos["alternativas"],
         "fecha": ganador_bcv['fecha'].strftime("%Y-%m-%dT%H:%M:%SZ")
     }

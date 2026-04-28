@@ -111,8 +111,16 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
             if precios: mercado["binance"] = round(sum(precios) / len(precios), 2)
     except: pass
 
-    # Intento B: Respaldo Binance vía PyDolarVenezuela
-    if not mercado["binance"]:
+    # Intento B: Respaldo Binance vía DolarAPI (Muy estable en Render)
+    if not mercado.get("binance"):
+        try:
+            res_da_bin = await client.get('https://ve.dolarapi.com/v1/dolares/binance', timeout=5.0)
+            if res_da_bin.status_code == 200:
+                mercado["binance"] = res_da_bin.json().get('promedio', None)
+        except: pass
+
+    # Intento C: Respaldo Binance vía PyDolarVenezuela
+    if not mercado.get("binance"):
         try:
             res_bin_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=binance', timeout=5.0)
             if res_bin_py.status_code == 200:
@@ -133,7 +141,7 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
     except: pass
     
     # Intento B: Respaldo Paralelo vía DolarAPI
-    if not mercado["enparalelovzla"]:
+    if not mercado.get("enparalelovzla"):
         try:
             res_da = await client.get('https://ve.dolarapi.com/v1/dolares/paralelo', timeout=5.0)
             if res_da.status_code == 200:
@@ -141,16 +149,13 @@ async def motor_tasas_alternativas(client: httpx.AsyncClient):
         except: pass
 
     # Intento C: Respaldo Paralelo vía PyDolarVenezuela
-    if not mercado["enparalelovzla"]:
+    if not mercado.get("enparalelovzla"):
         try:
             res_py = await client.get('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=enparalelovzla', timeout=5.0)
             if res_py.status_code == 200:
                 mercado["enparalelovzla"] = res_py.json()['monitors']['enparalelovzla']['price']
         except: pass
 
-    # Salvavidas final: Si todo falla, al menos copiamos el BCV para que no haya nulls fatales
-    # (Esto se resuelve más abajo en la consolidación si es necesario, pero garantizamos que el JSON se arme)
-    
     return {"mercado": mercado}
 
 # ==========================================
@@ -220,7 +225,7 @@ async def obtener_tasas_v2():
     ganador_bcv = max(fuentes_bcv, key=lambda x: x['fecha'])
     return {
         "bcv": ganador_bcv['usd'],
-        "eur": ganador_bcv['eur'], # ¡El Euro ahora está activo aquí!
+        "eur": ganador_bcv['eur'],
         "alternativas": datos["alternativas"],
         "fecha": ganador_bcv['fecha'].strftime("%Y-%m-%dT%H:%M:%SZ")
     }

@@ -21,7 +21,8 @@ ORIGINES_PERMITIDOS = [
     "https://monitor-tasas.vnzla.workers.dev",  # Monitor principal
     "https://repuestos-mga.vercel.app",                 # Catálogo de repuestos
     "https://aq-abrahanburguer.netlify.app",            # Página de Abrahan
-    "http://localhost:5500",                            # Entorno de desarrollo local
+    "http://localhost:5500",
+    "https://dgpos.vercel.app/"                            # Entorno de desarrollo local
     "http://127.0.0.1:5500"                             # Variante local
 ]
 

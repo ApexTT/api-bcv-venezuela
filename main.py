@@ -24,7 +24,7 @@ ORIGINES_PERMITIDOS = [
     "http://localhost:5500",
     "https://dgpos.vercel.app/"                            # Entorno de desarrollo local
     "http://127.0.0.1:5500"  
-    "http://localhost:3000"                           # Variante local
+    "http://localhost:3000/admin"                           # Variante local
 ]
 
 app.add_middleware(

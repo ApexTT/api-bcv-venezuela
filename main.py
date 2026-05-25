@@ -23,7 +23,8 @@ ORIGINES_PERMITIDOS = [
     "https://aq-abrahanburguer.netlify.app",            # Página de Abrahan
     "http://localhost:5500",
     "https://dgpos.vercel.app/"                            # Entorno de desarrollo local
-    "http://127.0.0.1:5500"                             # Variante local
+    "http://127.0.0.1:5500"  
+    "http://localhost:3000"                           # Variante local
 ]
 
 app.add_middleware(

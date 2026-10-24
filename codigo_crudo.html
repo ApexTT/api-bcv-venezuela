@@ -1,16 +1,238 @@
-<!DOCTYPE html><html lang="es" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dolar Al Dia - Dolar Al Dia Venezuela - Tasa de Cambio Actualizada</title><link rel="icon" href="/logo_dolar_icon.png" type="image/x-icon"><script async src="https://www.googletagmanager.com/gtag/js?id=G-27NVM4S2DW"></script><link rel="stylesheet" href="/_astro/dashboard.Q7qTz1VP.css"><script type="module" src="/_astro/hoisted.CPbTE36B.js"></script></head> <body> <div class="bg-gray-800 text-white py-4 px-4 sticky top-0 z-50"> <ul class="flex flex-wrap justify-start items-center list-none m-0 p-0 pl-10 gap-1 md:gap-4"> <li class="flex items-center"> <a href="#home" class="text-white text-lg md:text-xl px-1 md:px-4 py-2 flex items-center justify-start transition-all duration-300 ease-in-out transform hover:text-yellow-500 hover:scale-105">  Home </a> </li><li class="flex items-center"> <a href="#paginas" class="text-white text-lg md:text-xl px-1 md:px-4 py-2 flex items-center justify-start transition-all duration-300 ease-in-out transform hover:text-yellow-500 hover:scale-105">  Paginas </a> </li><li class="flex items-center"> <a href="#bancos" class="text-white text-lg md:text-xl px-1 md:px-4 py-2 flex items-center justify-start transition-all duration-300 ease-in-out transform hover:text-yellow-500 hover:scale-105">  Tasa Bancos </a> </li> </ul> </div> <main class="mx-auto container text-2xl md:pt-5">  <section id="home" class="scroll-mt-20"> <header class="bg-zinc-900 flex flex-col md:flex-row p-12 md:p-20 gap-8 text-center md:text-left rounded-xl items-center md:items-start"> <img src="/logoredondo.png" alt="Logo Dólar al Día" class="w-48 md:w-60"> <div class="flex-1"> <h1 class="text-5xl font-bold py-2 text-white">Dólar al Día</h1> <p class="text-gray-300">
-Aplicación móvil para mantenerse informado sobre las fluctuaciones del dólar en Venezuela
-</p> <!-- 
-       "items-center" para alinear verticalmente los botones entre sí 
-    --> <div class="flex flex-col md:flex-row gap-4 my-6 justify-center md:justify-start items-center"> <!-- Botón de descarga de la Play Store --> <a href="https://play.google.com/store/apps/details?id=com.carlosv.menulateral&hl=es_419" target="_blank"> <img src="/descarga_google_play.png" alt="Descargar en Google Play" class="w-48"> </a> <!-- Botón de descarga de la App Store --> <a href="https://apps.apple.com/ve/app/dolar-al-dia-venezuela/id6743636151" target="_blank"> <img src="/appstore.png" alt="Descargar en App Store" class="w-48"> </a> </div> <!-- <Button client:load/>  --> </div> </header> </section>  <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();;(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="ZLfLiU" prefix="r0" component-url="/_astro/DolarComponent.Beh7qoD7.js" component-export="default" renderer-url="/_astro/client.BIGLHmRd.js" props="{}" ssr="" client="load" opts="{&quot;name&quot;:&quot;DolarComponent&quot;,&quot;value&quot;:true}" await-children=""><p class="text-white text-center p-10">Cargando tasas de cambio...</p><!--astro:end--></astro-island>   <script>(()=>{var l=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value=="object"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let a of e)if(a.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=l;window.dispatchEvent(new Event("astro:visible"));})();</script><astro-island uid="Z2icupg" prefix="r1" component-url="/_astro/bancosdeVenezuelaReact.C1Bfjvb5.js" component-export="default" renderer-url="/_astro/client.BIGLHmRd.js" props="{}" ssr="" client="visible" opts="{&quot;name&quot;:&quot;BancosdeVenezuela&quot;,&quot;value&quot;:true}" await-children=""><p>Cargando datos...</p><!--astro:end--></astro-island>  <section id="usuarios" class="scroll-mt-20"> <h2 class="text-center font-bold text-5xl mt-10">Usuarios</h2> <div class="grid md:grid-cols-3 gap-4 p-4"> <div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">maria Abreu</h2> <p>Excelente aplicación tiene toda la información que necesitas sobre la cotización del dolar al día. Y lo mejor de todo que tienes en una sola pantalla el precio del dolar oficial así como del paralelo. También te muestra la diferencia entre ambos, en bolívares y dólares. Excelente... Me encantó</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★★</span></p> </div><div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">Henry Rodriguez</h2> <p>Es muy buena está aplicación mantiene muy buena información siempre nos pone al día con la información del dólar, por eso la recomiendo</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★★</span></p> </div><div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">Jesus Marcano Marxano</h2> <p>Exelente, información rápida y precisa.</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★★</span></p> </div><div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">139grecia</h2> <p>Gracias por incluir el Banco Exterior. Buenísimo que la aplicación tiene el precio del dólar promedio en la misma sección. Recomiendo esta aplicación</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★★</span></p> </div><div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">Teofilo Guzman</h2> <p>Aplicación perfecta en, las necesidades requeridas para la información, del movimiento diario del $.</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★★</span></p> </div><div class="bg-slate-800 p-10 rounded-xl"> <img src="/logo_usuario.png" alt="Feature usuario" class="w-24 h-auto mb-4 rounded-md"> <h2 class="text-xl font-bold my-4">Guillermo Moreno</h2> <p>Excelente aplicación. La mejor que he descargado para operar con la conversión. Que muestre ambas tasas está muy bien. Los felicito...</p> <p class="mt-4">Calificación: <span class="text-yellow-500">★★★★☆</span></p> </div> </div> </section> <section class="bg-zinc-900 p-20 rounded-xl my-4"> <h1 class="text-center font-bold text-5xl mt-10">Sobre Nosotros</h1> <p class="text-zinc-300 text-center">
-En "Dólar al Día", nos dedicamos a brindarte la información más precisa y
-      actualizada sobre los precios del dólar en Venezuela. Nuestro objetivo es
-      ofrecer una herramienta confiable y accesible para que puedas tomar
-      decisiones informadas en tu vida financiera diaria. Nuestra aplicación
-      monitorea las tasas del dólar oficiales y paralelas, proporcionando datos
-      en tiempo real. Con un diseño intuitivo y fácil de usar, "Dólar al Día" se
-      convierte en tu aliado ideal para estar siempre al tanto de la economía.
-</p> </section> <footer class="bg-zinc-900 text-white py-8 px-4"> <div class="flex flex-col items-center text-center space-y-4 md:flex-row md:justify-between md:text-left"> <!-- Información de contacto --> <div> <h2 class="text-lg font-semibold">Contacto</h2> <p>Teléfono: <a href="tel:+34636984509" class="text-indigo-400 hover:underline">+58 636-984509</a></p>
-=======
-<p>Teléfono: <a href="tel:+034936924820" class="text-indigo-400 hover:underline">+034 636-924820</a></p> </div> <!-- Redes sociales --> <div> <h2 class="text-lg font-semibold">Síguenos</h2> <p>
-Instagram: <a href="https://instagram.com/dolaraldiavenezuela" target="_blank" class="text-indigo-400 hover:underline">@dolaraldiavenezuela</a> </p> </div> <!-- Información adicional --> <div> <h2 class="text-lg font-semibold">Información</h2> <p>&copy; 2024 Dólar al Día</p> <p>Todos los derechos reservados.</p> </div> </div> </footer>  </main>  </body> </html>
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Tasas</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Colores personalizados basados en tu diseño original */
+        body { background-color: #0f111a; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
+        .card-bg { background-color: #1a1d2d; }
+        .calc-bg { background-color: #161825; }
+        .input-bg { background-color: #0f111a; border: 1px solid #2a2d3d; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="py-4 px-6 md:px-12 flex justify-between items-center border-b border-gray-800">
+        <div class="flex items-center gap-3">
+            <!-- Logo Tipográfico Generado -->
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center font-bold text-lg shadow-lg">
+                MT
+            </div>
+            <span class="text-xl font-semibold text-blue-400">Monitor de Tasas</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-400">
+            <span id="status-indicator" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+            <span id="status-text">Actualizando...</span>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+        
+        <!-- CABECERA -->
+        <header class="mb-10 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Tasas de Cambio Oficiales</h1>
+            <p class="text-gray-400">Consulta los valores actualizados en tiempo real y calcula tus conversiones al instante.</p>
+        </header>
+
+        <!-- TARJETAS DE PRECIOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            <!-- BCV -->
+            <div class="card-bg rounded-xl p-6 shadow-lg border border-gray-800 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-gray-300 font-medium">Dólar BCV</h3>
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                </div>
+                <p class="text-3xl font-bold">Bs. <span id="val-bcv" class="precio-valor text-white">--</span></p>
+            </div>
+            
+            <!-- Paralelo -->
+            <div class="card-bg rounded-xl p-6 shadow-lg border border-gray-800 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-gray-300 font-medium">Dólar Paralelo</h3>
+                    <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                </div>
+                <p class="text-3xl font-bold">Bs. <span id="val-paralelo" class="precio-valor text-white">--</span></p>
+            </div>
+
+            <!-- Binance -->
+            <div class="card-bg rounded-xl p-6 shadow-lg border border-gray-800 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-gray-300 font-medium">Binance P2P</h3>
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                </div>
+                <p class="text-3xl font-bold">Bs. <span id="val-binance" class="precio-valor text-white">--</span></p>
+            </div>
+
+            <!-- Euro -->
+            <div class="card-bg rounded-xl p-6 shadow-lg border border-gray-800 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-gray-300 font-medium">Euro Oficial</h3>
+                    <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                </div>
+                <p class="text-3xl font-bold">Bs. <span id="val-euro" class="precio-valor text-white">--</span></p>
+            </div>
+        </div>
+
+        <!-- CALCULADORA BIDIRECCIONAL -->
+        <div class="calc-bg border border-gray-800 rounded-xl p-6 md:p-8 shadow-2xl mb-12">
+            <div class="flex items-center gap-2 mb-6">
+                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                <h2 class="text-xl font-bold">Calculadora de Conversión</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Selector de Tasa -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm text-gray-400">Seleccionar Tasa</label>
+                    <select id="calc-tasa" class="input-bg text-white rounded-lg p-3 outline-none focus:border-blue-500 transition cursor-pointer disabled:opacity-50" disabled>
+                        <option value="bcv">Dólar BCV (Cargando...)</option>
+                        <option value="paralelo">Dólar Paralelo (Cargando...)</option>
+                        <option value="binance">Binance P2P (Cargando...)</option>
+                        <option value="euro">Euro Oficial (Cargando...)</option>
+                    </select>
+                </div>
+
+                <!-- Input Divisa -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm text-gray-400">Divisa ($ / €)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-500">$</span>
+                        <input type="number" id="calc-divisa" class="input-bg text-white rounded-lg p-3 pl-8 w-full outline-none focus:border-blue-500 transition disabled:opacity-50" placeholder="0.00" disabled>
+                    </div>
+                </div>
+
+                <!-- Input Bolívares -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm text-gray-400">Bolívares (Bs.)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-3 text-gray-500">Bs.</span>
+                        <input type="number" id="calc-bs" class="input-bg text-white rounded-lg p-3 pl-10 w-full outline-none focus:border-blue-500 transition disabled:opacity-50" placeholder="0.00" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BANNER DE PROMOCIÓN (Opcional, diseño copiado de la imagen) -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-center shadow-xl">
+            <h2 class="text-2xl md:text-3xl font-bold mb-2">¿Cansado de recalcular precios manualmente?</h2>
+            <p class="text-blue-100">Protege tu margen de ganancia. Automatiza tu inventario con nuestra API.</p>
+        </div>
+
+    </main>
+
+    <footer class="py-6 text-center text-gray-500 text-sm border-t border-gray-800 mt-auto">
+        &copy; 2026 Monitor de Tasas. Todos los derechos reservados.
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- MOTOR JAVASCRIPT: CONEXIÓN API Y CALCULADORA -->
+    <!-- ========================================== -->
+    <script>
+        // URL de tu API en Render
+        const API_URL = 'https://api-bcv-venezuela-lk85.onrender.com/api/v2/tasas';
+        
+        // Memoria local para la calculadora
+        let tasasActuales = {
+            bcv: 0,
+            paralelo: 0,
+            binance: 0,
+            euro: 0
+        };
+
+        // Elementos del DOM
+        const elBcv = document.getElementById('val-bcv');
+        const elParalelo = document.getElementById('val-paralelo');
+        const elBinance = document.getElementById('val-binance');
+        const elEuro = document.getElementById('val-euro');
+        
+        const calcTasa = document.getElementById('calc-tasa');
+        const calcDivisa = document.getElementById('calc-divisa');
+        const calcBs = document.getElementById('calc-bs');
+        
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+
+        // Formateador de números (2 decimales)
+        const formatNum = (num) => parseFloat(num).toFixed(2);
+
+        // Función principal de carga
+        async function cargarTasas() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Error en la red');
+                const data = await response.json();
+
+                // Guardar en memoria
+                tasasActuales.bcv = data.bcv;
+                tasasActuales.euro = data.eur;
+                tasasActuales.paralelo = data.alternativas.enparalelovzla;
+                tasasActuales.binance = data.alternativas.binance;
+
+                // Pintar en las tarjetas
+                elBcv.textContent = formatNum(tasasActuales.bcv);
+                elParalelo.textContent = formatNum(tasasActuales.paralelo);
+                elBinance.textContent = formatNum(tasasActuales.binance);
+                elEuro.textContent = formatNum(tasasActuales.euro);
+
+                // Actualizar opciones del select
+                calcTasa.innerHTML = `
+                    <option value="bcv">Dólar BCV (Bs. ${formatNum(tasasActuales.bcv)})</option>
+                    <option value="paralelo">Dólar Paralelo (Bs. ${formatNum(tasasActuales.paralelo)})</option>
+                    <option value="binance">Binance P2P (Bs. ${formatNum(tasasActuales.binance)})</option>
+                    <option value="euro">Euro Oficial (Bs. ${formatNum(tasasActuales.euro)})</option>
+                `;
+
+                // Habilitar calculadora
+                calcTasa.disabled = false;
+                calcDivisa.disabled = false;
+                calcBs.disabled = false;
+
+                // Actualizar estado superior
+                statusIndicator.classList.remove('bg-yellow-500', 'animate-pulse');
+                statusIndicator.classList.add('bg-green-500');
+                statusText.textContent = 'Actualizado';
+
+            } catch (error) {
+                console.error("Error cargando la API:", error);
+                statusIndicator.classList.remove('bg-yellow-500');
+                statusIndicator.classList.add('bg-red-500');
+                statusText.textContent = 'Error de conexión';
+            }
+        }
+
+        // Lógica de la calculadora bidireccional
+        function calcularDesdeDivisa() {
+            const tasaSeleccionada = tasasActuales[calcTasa.value];
+            const divisaVal = parseFloat(calcDivisa.value);
+            if (!isNaN(divisaVal) && tasaSeleccionada) {
+                calcBs.value = (divisaVal * tasaSeleccionada).toFixed(2);
+            } else {
+                calcBs.value = '';
+            }
+        }
+
+        function calcularDesdeBs() {
+            const tasaSeleccionada = tasasActuales[calcTasa.value];
+            const bsVal = parseFloat(calcBs.value);
+            if (!isNaN(bsVal) && tasaSeleccionada) {
+                calcDivisa.value = (bsVal / tasaSeleccionada).toFixed(2);
+            } else {
+                calcDivisa.value = '';
+            }
+        }
+
+        // Event Listeners para reaccionar al instante
+        calcDivisa.addEventListener('input', calcularDesdeDivisa);
+        calcBs.addEventListener('input', calcularDesdeBs);
+        calcTasa.addEventListener('change', calcularDesdeDivisa); // Recalcula si cambias la moneda
+
+        // Iniciar al cargar la página
+        window.addEventListener('DOMContentLoaded', cargarTasas);
+    </script>
+</body>
+</html>

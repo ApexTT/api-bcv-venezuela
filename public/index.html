@@ -3,11 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Tasas</title>
+    <title>Monitor de Tasas Venezuela - Calculadora en Tiempo Real</title>
+    <meta name="description" content="Consulta el precio del dólar BCV, Paralelo, Binance y Euro al instante. Usa nuestra calculadora bidireccional.">
+
+    <!-- ETIQUETAS PARA CAMBIAR "CLOUDFLARE" POR TU NOMBRE EN GOOGLE -->
+    <meta property="og:site_name" content="Monitor de Tasas Venezuela">
+    <meta property="og:title" content="Monitor de Tasas Venezuela - Calculadora en Tiempo Real">
+    <meta property="og:description" content="Consulta el precio del dólar BCV, Paralelo, Binance y Euro al instante. Usa nuestra calculadora bidireccional.">
+    <meta property="og:url" content="https://monitor-tasas.vnzla.workers.dev/">
+    <meta property="og:type" content="website">
+    <meta name="application-name" content="Monitor de Tasas Venezuela">
+
+    <!-- DATOS ESTRUCTURADOS OFICIALES DE GOOGLE (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Monitor de Tasas Venezuela",
+      "alternateName": ["Monitor de Tasas", "Tasas Venezuela"],
+      "url": "https://monitor-tasas.vnzla.workers.dev/"
+    }
+    </script>
+
     <!-- Tailwind CSS para el diseño -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Colores personalizados basados en tu diseño original */
         body { background-color: #0f111a; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
         .card-bg { background-color: #1a1d2d; }
         .calc-bg { background-color: #161825; }
@@ -117,7 +137,7 @@
             </div>
         </div>
 
-        <!-- BANNER DE PROMOCIÓN (Opcional, diseño copiado de la imagen) -->
+        <!-- BANNER DE PROMOCIÓN -->
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-center shadow-xl">
             <h2 class="text-2xl md:text-3xl font-bold mb-2">¿Cansado de recalcular precios manualmente?</h2>
             <p class="text-blue-100">Protege tu margen de ganancia. Automatiza tu inventario con nuestra API.</p>
@@ -133,10 +153,8 @@
     <!-- MOTOR JAVASCRIPT: CONEXIÓN API Y CALCULADORA -->
     <!-- ========================================== -->
     <script>
-        // URL de tu API en Render
         const API_URL = 'https://api-bcv-venezuela-lk85.onrender.com/api/v2/tasas';
         
-        // Memoria local para la calculadora
         let tasasActuales = {
             bcv: 0,
             paralelo: 0,
@@ -144,7 +162,6 @@
             euro: 0
         };
 
-        // Elementos del DOM
         const elBcv = document.getElementById('val-bcv');
         const elParalelo = document.getElementById('val-paralelo');
         const elBinance = document.getElementById('val-binance');
@@ -157,29 +174,24 @@
         const statusIndicator = document.getElementById('status-indicator');
         const statusText = document.getElementById('status-text');
 
-        // Formateador de números (2 decimales)
         const formatNum = (num) => parseFloat(num).toFixed(2);
 
-        // Función principal de carga
         async function cargarTasas() {
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Error en la red');
                 const data = await response.json();
 
-                // Guardar en memoria
                 tasasActuales.bcv = data.bcv;
                 tasasActuales.euro = data.eur;
                 tasasActuales.paralelo = data.alternativas.enparalelovzla;
                 tasasActuales.binance = data.alternativas.binance;
 
-                // Pintar en las tarjetas
                 elBcv.textContent = formatNum(tasasActuales.bcv);
                 elParalelo.textContent = formatNum(tasasActuales.paralelo);
                 elBinance.textContent = formatNum(tasasActuales.binance);
                 elEuro.textContent = formatNum(tasasActuales.euro);
 
-                // Actualizar opciones del select
                 calcTasa.innerHTML = `
                     <option value="bcv">Dólar BCV (Bs. ${formatNum(tasasActuales.bcv)})</option>
                     <option value="paralelo">Dólar Paralelo (Bs. ${formatNum(tasasActuales.paralelo)})</option>
@@ -187,12 +199,10 @@
                     <option value="euro">Euro Oficial (Bs. ${formatNum(tasasActuales.euro)})</option>
                 `;
 
-                // Habilitar calculadora
                 calcTasa.disabled = false;
                 calcDivisa.disabled = false;
                 calcBs.disabled = false;
 
-                // Actualizar estado superior
                 statusIndicator.classList.remove('bg-yellow-500', 'animate-pulse');
                 statusIndicator.classList.add('bg-green-500');
                 statusText.textContent = 'Actualizado';
@@ -205,7 +215,6 @@
             }
         }
 
-        // Lógica de la calculadora bidireccional
         function calcularDesdeDivisa() {
             const tasaSeleccionada = tasasActuales[calcTasa.value];
             const divisaVal = parseFloat(calcDivisa.value);
@@ -226,12 +235,10 @@
             }
         }
 
-        // Event Listeners para reaccionar al instante
         calcDivisa.addEventListener('input', calcularDesdeDivisa);
         calcBs.addEventListener('input', calcularDesdeBs);
-        calcTasa.addEventListener('change', calcularDesdeDivisa); // Recalcula si cambias la moneda
+        calcTasa.addEventListener('change', calcularDesdeDivisa);
 
-        // Iniciar al cargar la página
         window.addEventListener('DOMContentLoaded', cargarTasas);
     </script>
 </body>
